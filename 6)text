@@ -614,9 +614,9 @@ WhenBroadcastReceived(Paint Bottom)
             }
         }
     }
-    If (List.Length(textlog) > scrollingoffset)
+    If ((List.Length(textlog) > scrollingoffset) And (Not ((curscrl == List.Length(textlog)))))
     {
-        scrollingoffset += 0.4;
+        scrollingoffset += (0.4 + ((scrollingoffset + 3) < List.Length(textlog)));
     }
     Call Write(textlog[(scrollingoffset - 2)]) at(-233)((-140 + ((scrollingoffset % 1) * 9)));
     Call Write(textlog[(scrollingoffset - 1)]) at(-233)((-149 + ((scrollingoffset % 1) * 9)));
