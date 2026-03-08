@@ -1,5 +1,6 @@
 //The core logic is: Start of game: Generate maps, and then after it is done, print out the map's data such that it gets updated at the right times.
 //It's: Player waits for movement (or inventory item usage) => Player does specified action -> Picks up an item -> Enemies do actions -> Stairs
+//Map is 2360 tiles: 40 horizontal and 59 vertical
 
 //----- Green flag events ---------------------------------------------------------------------------------------------
 
