@@ -6,9 +6,10 @@
 
 WhenGreenFlagClicked() //Sets the player location at the middle.
 {
+    Control.Wait(1);
     Playerloc = 1180;
     PlayerPowerUps = 1;
-    PlayerDPointTile = 0;
+    PlayerDPointTile = 1;
 }
 
 
