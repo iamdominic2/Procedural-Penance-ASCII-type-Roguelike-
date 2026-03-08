@@ -1,0 +1,185 @@
+//Generates the map. The basic thing is to generate a room, some dead ends, one "real" end to the next room, change direction (potentially) and repeat several times.
+
+//----- Green flag events ---------------------------------------------------------------------------------------------
+
+WhenGreenFlagClicked() //Loading screen. Yes, the only way to hide it...
+{
+    floor = 0;
+    List.DeleteAll(MH floors);
+    List.DeleteAll(Generating Map... Please Wait...);
+    List.Show(Generating Map... Please Wait...);
+    List.Add(Generating Map... Please Wait..., "0%");
+    List.Add(Generating Map... Please Wait..., "Controls:");
+    List.Add(Generating Map... Please Wait..., "Arrow Keys - Move");
+    List.Add(Generating Map... Please Wait..., "Z - Attack");
+    List.Add(Generating Map... Please Wait..., "X + Arrows - Dash");
+    List.Add(Generating Map... Please Wait..., "C or I - inventory");
+    List.Add(Generating Map... Please Wait..., "X+Z - Step in place");
+    List.Add(Generating Map... Please Wait..., "A - Hide enemies");
+    List.Add(Generating Map... Please Wait..., "S - Diagonal Movement");
+    List.Add(Generating Map... Please Wait..., "D - Change direction without moving");
+    List.Add(Generating Map... Please Wait..., "Mouse wheel or P/L: Scroll up/down message log");
+    Repeat (40)
+    {
+        floor += 1;
+        Event.BroadcastAndWait("Generate");
+        Event.BroadcastAndWait("ScanMap");
+        List.ReplaceItem(Generating Map... Please Wait..., 1, Operator.Join(Operator.Round(((floor * 2.5) + Operator.Random(-0.01 , 0.01))), "%"));
+    }
+    Pen.Clear();
+    List.Hide(Generating Map... Please Wait...);
+    Event.Broadcast("StartGame");
+    generatingmap = 0;
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(Generate)
+{
+    generatingmap = 1;
+    Looks.Show();
+    Call Generate;
+    Looks.Hide();
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define Generate (warp=true)
+{
+    Pen.Clear();
+    rooms# = 0;
+    If ((floor == 26) Or (floor == 40))
+    {
+        Motion.GoToXY(0, 0);
+        Looks.SetSizeTo(400);
+        Looks.SwitchCostumeTo(Boss);
+        Pen.Stamp();
+        Stop(this script);
+    }
+    If ((Operator.Random(1 , 120) == 1) And (floor > 6))
+    {
+        Motion.GoToXY(0, 0);
+        Looks.SetSizeTo(100);
+        Looks.SwitchCostumeTo(GHMH);
+        Pen.Stamp();
+        Motion.GoToXY(Operator.Random(-185 , 185), Operator.Random(-85 , 110));
+        Looks.SwitchCostumeTo(stair);
+        List.Add(MH floors, floor);
+        Pen.Stamp();
+    }
+    Else
+    {
+        mapgen:turn = 0;
+        Motion.GoToXY(0, 25);
+        List.DeleteAll(stamprooms);
+        mapgen:turnback = 0;
+        Motion.SetRotationStyle(don't rotate);
+        Repeat (Operator.Random((15 + (floor / 3)) , (20 + (floor / 3))))
+        {
+            mapgen:movecount = Operator.Random(30 , (48 / (mapgen:turnback + 1)));
+            Looks.SwitchCostumeTo(Operator.Random(1 , 9));
+            Looks.ClearGraphicEffects();
+            Looks.SetSizeTo(750);
+            If (Not (Sensing.TouchingColour(#000000)))
+            {
+                Looks.SetSizeTo(300);
+                Pen.Stamp();
+                List.Add(stamprooms, Motion.XPosition());
+                List.Add(stamprooms, Motion.YPosition());
+                List.Add(stamprooms, Costume.GetNumberName(number));
+            }
+            Looks.SetSizeTo(150);
+            Looks.SwitchCostumeTo(11);
+            Looks.SetEffectTo(BRIGHTNESS, 90);
+            If (mapgen:turnback == 1)
+            {
+                Repeat (mapgen:movecount)
+                {
+                    Pen.Stamp();
+                    Motion.Move(-1);
+                }
+            }
+            Else
+            {
+                Motion.ChangeXBy(Operator.Random(-5 , 5));
+                Motion.ChangeYBy(Operator.Random(-5 , 5));
+            }
+            Repeat (mapgen:movecount)
+            {
+                Pen.Stamp();
+                Motion.Move(1);
+            }
+            If (Not ((mapgen:turn == 0)))
+            {
+                mapgen:turn = 0;
+            }
+            Else
+            {
+                mapgen:turn = Operator.Random(-1 , 1);
+                If (mapgen:turnback == 1)
+                {
+                    mapgen:turn = ((Operator.Random(-1 , 0) + 0.5) * 2);
+                }
+            }
+            Motion.TurnRight((mapgen:turn * 90));
+            Looks.SwitchCostumeTo(11);
+            Looks.SetEffectTo(BRIGHTNESS, 90);
+            mapgen:turnback = Operator.Random(0 , 1);
+        }
+        Looks.SwitchCostumeTo(Operator.Random(1 , 9));
+        If (Not (Sensing.TouchingColour(#000000)))
+        {
+            Looks.ClearGraphicEffects();
+            Pen.Stamp();
+            List.Add(stamprooms, Motion.XPosition());
+            List.Add(stamprooms, Motion.YPosition());
+            List.Add(stamprooms, Costume.GetNumberName(number));
+        }
+        Looks.ClearGraphicEffects();
+        mapgen:counter = 1;
+        mapgen:stair room = (Operator.Random(Operator.Round((List.Length(stamprooms) / 6)) , (List.Length(stamprooms) / 3)) * 3);
+        Repeat ((List.Length(stamprooms) / 3))
+        {
+            Looks.ClearGraphicEffects();
+            Motion.GoToXY(stamprooms[mapgen:counter], stamprooms[(mapgen:counter + 1)]);
+            Looks.SetSizeTo(300);
+            Looks.SwitchCostumeTo(stamprooms[(mapgen:counter + 2)]);
+            Pen.Stamp();
+            If (Sensing.TouchingObject(_edge_) Or Sensing.TouchingObject(edger))
+            {
+                Call Generate;
+                Stop(this script);
+            }
+            If ((mapgen:counter + 2) == mapgen:stair room)
+            {
+                Looks.SwitchCostumeTo(stair);
+                Pen.Stamp();
+            }
+            mapgen:counter += 3;
+        }
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+11.png
+55.png
+57.png
+59.png
+75.png
+77.png
+79.png
+95.png
+97.png
+99.png
+Boss.png
+GHMH.png
+stair.png
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav
