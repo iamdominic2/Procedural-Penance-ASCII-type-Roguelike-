@@ -13,7 +13,7 @@ WhenBroadcastReceived(clearclones)
     Control.DeleteThisClone();
 }
 
-WhenBroadcastReceived(Paint Bottom)
+WhenBroadcastReceived(Paint Bottom) //Tells game to print the HUD and HP bar
 {
     Costume.GoToFrontBack(front);
     Looks.SetEffectTo(BRIGHTNESS, 100);
@@ -39,7 +39,7 @@ WhenBroadcastReceived(Paint Bottom)
 
 //----- Custom blocks -------------------------------------------------------------------------------------------------
 
-Define Write(string number or text) at(string x) (warp=true)
+Define Write(string number or text) at(string x) (warp=true)  //This one writes text
 {
     Looks.SetSizeTo(40);
     Looks.Show();
