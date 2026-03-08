@@ -1,6 +1,9 @@
+//The core logic is: Start of game: Generate maps, and then after it is done, print out the map's data such that it gets updated at the right times.
+//It's: Player waits for movement (or inventory item usage) => Player does specified action -> Picks up an item -> Enemies do actions -> Stairs
+
 //----- Green flag events ---------------------------------------------------------------------------------------------
 
-WhenGreenFlagClicked()
+WhenGreenFlagClicked() //Sets the player location at the middle.
 {
     Playerloc = 1180;
     PlayerPowerUps = 1;
@@ -15,28 +18,28 @@ WhenBroadcastReceived(PastTurn)
     Call PastTurn;
 }
 
-WhenBroadcastReceived(StartGame)
+WhenBroadcastReceived(StartGame) //Starts the game: Movement of player.
 {
-    floor = 1;
+    floor = 1; 
     floorlight = 0;
     turn = 0;
     List.DeleteAll(revealed tiles);
     List.DeleteAll(mapitems);
     List.DeleteAll(flooritemmount);
-    Call Generate items;
+    Call Generate items; //Map state according to generated data.
     Forever
     {
         Pen.Clear();
         Call PaintMap;
         Call Illuminate;
         prev pos = Playerloc;
-        If (inventoryopen == 0)
+        If (inventoryopen == 0) 
         {
-            Call Movement;
+            Call Movement; //(Input)
         }
         Else
         {
-            Repeat Until (inventoryopen == 0)
+            Repeat Until (inventoryopen == 0) //Ignores inputs when it reguards to player movement and waits for exiting menu
             {
                 Pen.Clear();
                 Call PaintMap;
@@ -45,9 +48,9 @@ WhenBroadcastReceived(StartGame)
             }
             Control.Wait(0);
         }
-        If ((Operator.LetterOf(maps[floor], Playerloc) == 1) Or ((floor == 26) And (Not (List.ContainsItem(monstermaploc, "Q")))))
+        If ((Operator.LetterOf(maps[floor], Playerloc) == 1) Or ((floor == 26) And (Not (List.ContainsItem(monstermaploc, "Q"))))) //The stairs, or when Miniboss Queen is downed.
         {
-            If List.ContainsItem(MH floors, floor)
+            If List.ContainsItem(MH floors, floor) //Monster House
             {
                 Sound.StopAllSounds();
             }
@@ -60,7 +63,7 @@ WhenBroadcastReceived(StartGame)
             Control.Wait(0);
             Sound.Play(Footsteps);
             floorlight = 0;
-            If ((floor == 26) Or (floor == 40))
+            If ((floor == 26) Or (floor == 40)) //Boss floors have no items
             {
                 List.DeleteAll(revealed tiles);
                 List.DeleteAll(mapitems);
@@ -80,7 +83,7 @@ WhenBroadcastReceived(StartGame)
             }
             Control.Wait(0.2);
         }
-        If ((floor == 40) And (Not (List.ContainsItem(monstermaploc, "G"))))
+        If ((floor == 40) And (Not (List.ContainsItem(monstermaploc, "G")))) //Final boss is defeated.
         {
             Control.Wait(1);
             List.Add(textlog, "You win!");
@@ -100,7 +103,7 @@ WhenBroadcastReceived(StartGame)
 
 //----- Custom blocks -------------------------------------------------------------------------------------------------
 
-Define additem(string ) (warp=false)
+Define additem(string ) (warp=false) //The script that actually adds the items to the data.
 {
     If ( == "")
     {
@@ -168,7 +171,7 @@ Define additem(string ) (warp=false)
     }
 }
 
-Define Generate items (warp=true)
+Define Generate items (warp=true) //Adds items based on floor. Usually, higher floors have higher item count to balance increased resource usage.
 {
     counter3 = 0;
     sas = 0;
@@ -195,7 +198,7 @@ Define Generate items (warp=true)
     }
 }
 
-Define Illuminate (warp=false)
+Define Illuminate (warp=false) //Illuminates a 7x7 square with the player at the centre when he moves. Doesn't look nice, but it works.
 {
     Call Reveal(Playerloc);
     Call Reveal((Playerloc - 1));
@@ -248,7 +251,7 @@ Define Illuminate (warp=false)
     Call Reveal((Playerloc + 43));
 }
 
-Define ItemCheck (warp=false)
+Define ItemCheck (warp=false) //Checks for items being picked up. 
 {
     counter2 = 0;
     Repeat (2360)
@@ -258,7 +261,7 @@ Define ItemCheck (warp=false)
         {
             If ((counter2 == Playerloc) And (drop == 0))
             {
-                If (((List.Length(inventory) == 20) And (mapitems[counter2] < 51)) Or Sensing.KeyPressed(x))
+                If (((List.Length(inventory) == 20) And (mapitems[counter2] < 51)) Or Sensing.KeyPressed(x)) //Reject item if dashing or inventory full.
                 {
                     If (Not ((att == 1)))
                     {
@@ -277,7 +280,7 @@ Define ItemCheck (warp=false)
                     If (mapitems[counter2] > 50)
                     {
                         Sound.Play(Coin);
-                        List.Add(textlog, Operator.Join(Operator.Join("Picked up $", (mapitems[counter2] - 45)), "."));
+                        List.Add(textlog, Operator.Join(Operator.Join("Picked up $", (mapitems[counter2] - 45)), ".")); //Abolished because no use for money
                         PlayerMoney += (mapitems[counter2] - 45);
                     }
                     Else
@@ -295,7 +298,7 @@ Define ItemCheck (warp=false)
                         List.Add(equipped, 0);
                         If (inventorycount[List.Length(inventorycount)] > 0)
                         {
-                            List.Add(textlog, Operator.Join(Operator.Join("Picked up ", Operator.Join(items[mapitems[counter2]], Operator.Join("+", flooritemmount[counter2]))), "."));
+                            List.Add(textlog, Operator.Join(Operator.Join("Picked up ", Operator.Join(items[mapitems[counter2]], Operator.Join("+", flooritemmount[counter2]))), ".")); //Items with charges or enhancement values.
                         }
                         Else
                         {
@@ -313,7 +316,7 @@ Define ItemCheck (warp=false)
 
 Define Movement (warp=false)
 {
-    Repeat Until ((moved == 1) Or (inventoryopen == 1))
+    Repeat Until ((moved == 1) Or (inventoryopen == 1)) //React to a input by the player
     {
         attack = 0;
         Pen.Clear();
@@ -395,7 +398,7 @@ Define Movement (warp=false)
             {
                 If Sensing.KeyPressed(up arrow)
                 {
-                    If (Not (Sensing.KeyPressed(s)))
+                    If (Not (Sensing.KeyPressed(s))) //Lock non-diagonal inputs
                     {
                         PlayerDPointTile = -1;
                     }
@@ -546,11 +549,11 @@ Define Movement (warp=false)
                                 {
                                     drop = 1;
                                     Sound.Play(Door Closing);
-                                    If (player's status > 100)
+                                    If (player's status > 100) //Confused causes disoriented attacks
                                     {
                                         PlayerDPointTile = 1tiler[random];
                                     }
-                                    If (monstermaploc[(Playerloc + PlayerDPointTile)] > "")
+                                    If (monstermaploc[(Playerloc + PlayerDPointTile)] > "") //If monster exists at target
                                     {
                                         Looks.SwitchCostumeTo(monstermaploc[(Playerloc + PlayerDPointTile)]);
                                         If ((Operator.Random(1 , (12 / ((inventory[List.IndexOf(equipped, "Armband")] == 23) + 1))) == 1) Or (inventory[List.IndexOf(equipped, "Sword")] == 1))
@@ -563,7 +566,7 @@ Define Movement (warp=false)
                                             }
                                             Else
                                             {
-                                                List.Add(textlog, "Did a critical hit!");
+                                                List.Add(textlog, "Did a critical hit!"); //Critical hit.
                                                 Sound.Play(Punch1);
                                                 Sound.Play(strong);
                                                 dmg = Operator.Round((((((inventory[List.IndexOf(equipped, "Sword")] == 7) And Operator.Contains(monster stats[(Costume.GetNumberName(number) - 23)], "G")) Or ((inventory[List.IndexOf(equipped, "Sword")] == 5) And Operator.Contains(monster stats[(Costume.GetNumberName(number) - 23)], "F"))) + 1) * ((Operator.Random(1.8 , 2) * (((PlayerAtk - Operator.Join(Operator.LetterOf(monster stats[(Costume.GetNumberName(number) - 23)], 3), Operator.LetterOf(monster stats[(Costume.GetNumberName(number) - 23)], 4))) * ((PlayerAtk - Operator.Join(Operator.LetterOf(monster stats[(Costume.GetNumberName(number) - 23)], 3), Operator.LetterOf(monster stats[(Costume.GetNumberName(number) - 23)], 4))) > 0)) + 1)) * PlayerPowerUps)));
@@ -587,11 +590,11 @@ Define Movement (warp=false)
                                         {
                                             List.Add(textlog, Operator.Join(Operator.Join(Operator.Join("Dealt ", dmg), " damage to "), Operator.Join(MonsterNames[(Costume.GetNumberName(number) - 23)], ".")));
                                             List.ReplaceItem(monsterhp, (Playerloc + PlayerDPointTile), (monsterhp[(Playerloc + PlayerDPointTile)] - dmg));
-                                            If (inventory[List.IndexOf(equipped, "Sword")] == 2)
+                                            If (inventory[List.IndexOf(equipped, "Sword")] == 2) //Life Drain
                                             {
                                                 PlayerHp += ceiling((dmg / 7));
                                             }
-                                            If (monsterhp[(Playerloc + PlayerDPointTile)] < 1)
+                                            If (monsterhp[(Playerloc + PlayerDPointTile)] < 1) //Erasese the monster
                                             {
                                                 List.ReplaceItem(monstermaploc, (Playerloc + PlayerDPointTile), "");
                                                 List.ReplaceItem(monsterhp, (Playerloc + PlayerDPointTile), "");
@@ -613,7 +616,7 @@ Define Movement (warp=false)
                                             }
                                             Else
                                             {
-                                                If ((inventory[List.IndexOf(equipped, "Sword")] == 3) And (Operator.Random(1 , 9) == 1))
+                                                If ((inventory[List.IndexOf(equipped, "Sword")] == 3) And (Operator.Random(1 , 9) == 1)) //Chaos Axe
                                                 {
                                                     projectiletile = (Playerloc + PlayerDPointTile);
                                                     If (Operator.Random(1 , 2) == 1)
@@ -636,7 +639,7 @@ Define Movement (warp=false)
                                                         {
                                                             If (monsterhp[projectiletile] > 99)
                                                             {
-                                                                List.Add(textlog, "But it was nullified!");
+                                                                List.Add(textlog, "But it was nullified!"); //Slowing a boss is too easy, huh?
                                                             }
                                                             Else
                                                             {
@@ -671,7 +674,7 @@ Define Movement (warp=false)
                         }
                     }
                 }
-                If ((Sensing.KeyPressed(z) And Sensing.KeyPressed(x)) And (PlayerFull > 0))
+                If ((Sensing.KeyPressed(z) And Sensing.KeyPressed(x)) And (PlayerFull > 0)) //Pass turns with X+Z
                 {
                     moved = 1;
                     Event.Broadcast("Footstomp");
@@ -688,7 +691,7 @@ Define Movement (warp=false)
             moved = 1;
         }
     }
-    If (moved == 1)
+    If (moved == 1) //Status recovery
     {
         Call ItemCheck;
         drop = 0;
@@ -708,7 +711,7 @@ Define Movement (warp=false)
     moved = 0;
 }
 
-Define MoveRandom (warp=true)
+Define MoveRandom (warp=true) //Random movement when confused
 {
     Repeat (100)
     {
@@ -729,7 +732,7 @@ Define MoveRandom (warp=true)
     }
 }
 
-Define PaintMap (warp=true)
+Define PaintMap (warp=true) //Paints the map based on the things in the Map List.
 {
     Looks.Show();
     Motion.GoToXY(-238, 178);
@@ -885,7 +888,7 @@ Define PaintMap (warp=true)
     Looks.Hide();
 }
 
-Define PastTurn (warp=false)
+Define PastTurn (warp=false) //Pass turns with X+Z
 {
     turn += 1;
     Event.Broadcast("EnemyMovement");
@@ -1009,7 +1012,7 @@ Define REALMOVE (warp=false)
     }
 }
 
-Define Reveal(string number or text) (warp=true)
+Define Reveal(string number or text) (warp=true) //Reveal a specific tile
 {
     If (Not (List.ContainsItem(revealed tiles, number or text)))
     {
@@ -1017,7 +1020,7 @@ Define Reveal(string number or text) (warp=true)
     }
 }
 
-Define RevealMap (warp=true)
+Define RevealMap (warp=true) //Reveals all the tiles 7x7 of a empty square.
 {
     revealloc = 0;
     floorlight = 1;
