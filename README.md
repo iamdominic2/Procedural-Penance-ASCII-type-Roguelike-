@@ -77,3 +77,7 @@ v1.1: Added "Swap" command when on top of item for better convenience when the i
 v1.2: Made equipped items have E symbol, made inventory displayed at all times instead of only when open, fixed 1 typo
 
 v1.3: Can now scroll text with P/L or mouse wheel & Now start facing down
+
+Again, note that I only documented post-implementation to ensure full accuracy with the final balanced numbers and code as I might forget to change things here along the way.
+
+Project ID = 873659659
