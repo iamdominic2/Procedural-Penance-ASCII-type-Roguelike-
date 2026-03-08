@@ -1,4 +1,4 @@
-# ASCII-type-Roguelike-Procedural-Penance
+# Procedural Penance (ASCII-type-Roguelike)
 "Real" roguelike that honors the old days of ASCII Rogue and similar games
 
 Playable link:
