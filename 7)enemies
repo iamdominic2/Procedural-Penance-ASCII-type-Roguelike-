@@ -233,7 +233,7 @@ Define 1tilespecials (warp=true) //Adjacent monsters' special abiltiies. Most ex
         Sound.Play(Bite);
         List.Add(textlog, "Snake bit you.");
         dmg = 5;
-        List.Add(textlog, Operator.Join(Operator.Join(Operator.Join("Took ", dmg), " damage from "), "Zombie."));
+        List.Add(textlog, Operator.Join(Operator.Join(Operator.Join("Took ", dmg), " damage from "), "Snake."));
         PlayerHp += (-1 * dmg);
         List.Add(textlog, "You became paralyzed!");
         player's status = 203;
