@@ -5,7 +5,7 @@ Playable link:
 https://iamdominic2.itch.io/ascii-type-roguelike-procedural-penance
 
 HTML file link:
-https://drive.google.com/file/d/1hW3pL0tiuJLlH_YTC9yDrqcIzqReaChd/view?usp=sharing
+https://drive.google.com/file/d/1fdTElcujDNPx3Xg2j-4ijFOaamDzaEOR/view?usp=sharing
 
 In the code, most of the core logic systems occur in Map&PC, Text, and Enemies.
 
